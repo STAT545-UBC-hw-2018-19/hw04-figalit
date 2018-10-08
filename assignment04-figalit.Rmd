@@ -1,4 +1,8 @@
 ---
 title: "Assignment 04"
-output: html_document
+author: "Figali Taho" 
+date: "09 Oct 2018"
+output:
+  github_document:
+    toc: yes
 ---
