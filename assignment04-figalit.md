@@ -113,25 +113,137 @@ knitr::kable(unique(gapminder$continent))
 I'll go ahead and build a super simple (and kind of proof of concept only) dataframe that has a row per continent, a variable about number of countries for that continent and another variable for whether it is in northern or southern hemisphere.
 
 ``` r
-continentExtraInfo <- tribble( ~name, ~noCountries, ~hemisphere, 
+continentExtraInfo <- tribble( ~continent, ~noCountries, ~hemisphere, 
                                "Asia", 48, "North",
                                "Europe", 44, "North",
                                "Africa", 54, "South",
                                "Americas", 55, "North",
                                "Oceania", 14, "South")
-?tribble
 ```
 
-    ## Help on topic 'tribble' was found in the following packages:
-    ## 
-    ##   Package               Library
-    ##   tibble                /Library/Frameworks/R.framework/Versions/3.5/Resources/library
-    ##   dplyr                 /Library/Frameworks/R.framework/Versions/3.5/Resources/library
-    ## 
-    ## 
-    ## Using the first match ...
-
 I could have alternatively built a csv file and read it into a dataframe, but due to the small data I avoided that approach, and use a nice tribble that makes more sense for such small data.
+
+Let's now join the tibbles using these four mutating functions: `left_join`, `right_join`, `inner_join` and `full_join`.
+
+``` r
+knitr::kable(head(left_join(gapminder, continentExtraInfo, by = "continent")))
+```
+
+    ## Warning: Column `continent` joining factor and character vector, coercing
+    ## into character vector
+
+| country     | continent |  year|  lifeExp|       pop|  gdpPercap|  noCountries| hemisphere |
+|:------------|:----------|-----:|--------:|---------:|----------:|------------:|:-----------|
+| Afghanistan | Asia      |  1952|   28.801|   8425333|   779.4453|           48| North      |
+| Afghanistan | Asia      |  1957|   30.332|   9240934|   820.8530|           48| North      |
+| Afghanistan | Asia      |  1962|   31.997|  10267083|   853.1007|           48| North      |
+| Afghanistan | Asia      |  1967|   34.020|  11537966|   836.1971|           48| North      |
+| Afghanistan | Asia      |  1972|   36.088|  13079460|   739.9811|           48| North      |
+| Afghanistan | Asia      |  1977|   38.438|  14880372|   786.1134|           48| North      |
+
+As we can see, the (not so informative) columns were added to the result due to the left join based on continent name. To understand that this is working as intended, I will try leaving out `Asia` from my tribble and check that the left join produces undefined result for this continent's `noCountries` and `hemisphere`.
+
+``` r
+continentMissingExtraInfo <- tribble( ~continent, ~noCountries, ~hemisphere, 
+                               "Europe", 44, "North",
+                               "Africa", 54, "South",
+                               "Americas", 55, "North",
+                               "Oceania", 14, "South") # No Asia row.
+
+knitr::kable(head(left_join(gapminder, continentMissingExtraInfo, by = "continent")))
+```
+
+    ## Warning: Column `continent` joining factor and character vector, coercing
+    ## into character vector
+
+| country     | continent |  year|  lifeExp|       pop|  gdpPercap|  noCountries| hemisphere |
+|:------------|:----------|-----:|--------:|---------:|----------:|------------:|:-----------|
+| Afghanistan | Asia      |  1952|   28.801|   8425333|   779.4453|           NA| NA         |
+| Afghanistan | Asia      |  1957|   30.332|   9240934|   820.8530|           NA| NA         |
+| Afghanistan | Asia      |  1962|   31.997|  10267083|   853.1007|           NA| NA         |
+| Afghanistan | Asia      |  1967|   34.020|  11537966|   836.1971|           NA| NA         |
+| Afghanistan | Asia      |  1972|   36.088|  13079460|   739.9811|           NA| NA         |
+| Afghanistan | Asia      |  1977|   38.438|  14880372|   786.1134|           NA| NA         |
+
+As seen above, this produces desired result.
+
+Using the latter values, and plotting the `right_join` produces a result whereby Asia is ommited, since it is not present in the `continentMissingExtraInfo` variable.
+
+``` r
+knitr::kable(head(right_join(gapminder, continentMissingExtraInfo, by = "continent")))
+```
+
+    ## Warning: Column `continent` joining factor and character vector, coercing
+    ## into character vector
+
+| country | continent |  year|  lifeExp|      pop|  gdpPercap|  noCountries| hemisphere |
+|:--------|:----------|-----:|--------:|--------:|----------:|------------:|:-----------|
+| Albania | Europe    |  1952|    55.23|  1282697|   1601.056|           44| North      |
+| Albania | Europe    |  1957|    59.28|  1476505|   1942.284|           44| North      |
+| Albania | Europe    |  1962|    64.82|  1728137|   2312.889|           44| North      |
+| Albania | Europe    |  1967|    66.22|  1984060|   2760.197|           44| North      |
+| Albania | Europe    |  1972|    67.69|  2263554|   3313.422|           44| North      |
+| Albania | Europe    |  1977|    68.93|  2509048|   3533.004|           44| North      |
+
+Using the normal tribble should not omit Asia from the result:
+
+``` r
+knitr::kable(head(right_join(gapminder, continentExtraInfo, by = "continent")))
+```
+
+    ## Warning: Column `continent` joining factor and character vector, coercing
+    ## into character vector
+
+| country     | continent |  year|  lifeExp|       pop|  gdpPercap|  noCountries| hemisphere |
+|:------------|:----------|-----:|--------:|---------:|----------:|------------:|:-----------|
+| Afghanistan | Asia      |  1952|   28.801|   8425333|   779.4453|           48| North      |
+| Afghanistan | Asia      |  1957|   30.332|   9240934|   820.8530|           48| North      |
+| Afghanistan | Asia      |  1962|   31.997|  10267083|   853.1007|           48| North      |
+| Afghanistan | Asia      |  1967|   34.020|  11537966|   836.1971|           48| North      |
+| Afghanistan | Asia      |  1972|   36.088|  13079460|   739.9811|           48| North      |
+| Afghanistan | Asia      |  1977|   38.438|  14880372|   786.1134|           48| North      |
+
+Inner join should be interesting. Let's demonstrate it by only including `Oceania` in a new custom extra information tribble
+
+``` r
+oceaniaExtraInfo <-  tribble( ~continent, ~noCountries, ~hemisphere, 
+                              "Oceania", 14, "South") # Only Oceania
+knitr::kable(head(inner_join(gapminder, oceaniaExtraInfo, by = "continent")))
+```
+
+    ## Warning: Column `continent` joining factor and character vector, coercing
+    ## into character vector
+
+| country   | continent |  year|  lifeExp|       pop|  gdpPercap|  noCountries| hemisphere |
+|:----------|:----------|-----:|--------:|---------:|----------:|------------:|:-----------|
+| Australia | Oceania   |  1952|    69.12|   8691212|   10039.60|           14| South      |
+| Australia | Oceania   |  1957|    70.33|   9712569|   10949.65|           14| South      |
+| Australia | Oceania   |  1962|    70.93|  10794968|   12217.23|           14| South      |
+| Australia | Oceania   |  1967|    71.10|  11872264|   14526.12|           14| South      |
+| Australia | Oceania   |  1972|    71.93|  13177000|   16788.63|           14| South      |
+| Australia | Oceania   |  1977|    73.49|  14074100|   18334.20|           14| South      |
+
+The above produces an intersection of the dataframes, whereby only the `Oceania` continent information, joined with the new information for this continent, was produced.
+
+A full join using the above created tribble should also be interesting, as it should produce a lot of n/a values for our newly added columns. Let's see:
+
+``` r
+knitr::kable(head(full_join(gapminder, oceaniaExtraInfo, by = "continent")))
+```
+
+    ## Warning: Column `continent` joining factor and character vector, coercing
+    ## into character vector
+
+| country     | continent |  year|  lifeExp|       pop|  gdpPercap|  noCountries| hemisphere |
+|:------------|:----------|-----:|--------:|---------:|----------:|------------:|:-----------|
+| Afghanistan | Asia      |  1952|   28.801|   8425333|   779.4453|           NA| NA         |
+| Afghanistan | Asia      |  1957|   30.332|   9240934|   820.8530|           NA| NA         |
+| Afghanistan | Asia      |  1962|   31.997|  10267083|   853.1007|           NA| NA         |
+| Afghanistan | Asia      |  1967|   34.020|  11537966|   836.1971|           NA| NA         |
+| Afghanistan | Asia      |  1972|   36.088|  13079460|   739.9811|           NA| NA         |
+| Afghanistan | Asia      |  1977|   38.438|  14880372|   786.1134|           NA| NA         |
+
+Thanks for reading my homework! Enjoy your day :smile:
 
 ### Resources
 
