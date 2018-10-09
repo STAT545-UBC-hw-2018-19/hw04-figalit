@@ -6,7 +6,6 @@ Figali Taho
 -   [Tidy data and joins!](#tidy-data-and-joins)
     -   [Data Reshaping Prompt](#data-reshaping-prompt)
     -   [Join Prompt (join, merge, look up)](#join-prompt-join-merge-look-up)
-    -   [Resources](#resources)
 
 Tidy data and joins!
 --------------------
@@ -47,7 +46,7 @@ knitr::kable(lifeExpPerYear_CanadaVsSwiss)
 |  2002|  79.770|       80.620|
 |  2007|  80.653|       81.701|
 
-\[x\] Take advantage of this new data shape to scatterplot life expectancy for one country against that of another. To plot the data for each country separately, we would do something on these terms, for example, for Canada:
+\[x\] Take advantage of this new data shape to scatterplot life expectancy for one country against that of another. To scatterplot the data for Canada for example, we would do something on these terms:
 
 ``` r
 ggplot(lifeExpPerYear_CanadaVsSwiss, aes(x=year, y=Canada)) +
@@ -62,19 +61,19 @@ ggplot(lifeExpPerYear_CanadaVsSwiss, aes(x=year, y=Canada)) +
 The advantage of this approach lies in the fact that now we have the data in a readily and easily servable state for comparison with one another, and we can "combine" the two plots together to better see the underlying trends.
 
 ``` r
-ggplot() +
-  geom_point(data=lifeExpPerYear_CanadaVsSwiss, aes(year, Canada)) + 
-  geom_smooth(data=lifeExpPerYear_CanadaVsSwiss, aes(year, Canada), 
-              colour="darkblue", size=0.5) + 
-  geom_point(data=lifeExpPerYear_CanadaVsSwiss, aes(year, Switzerland)) + 
-  geom_smooth(data=lifeExpPerYear_CanadaVsSwiss, aes(year, Switzerland), 
-              colour="pink", size=0.5)
+ggplot(lifeExpPerYear_CanadaVsSwiss, aes(year)) +
+  geom_point(aes(y=Canada, color='red')) +
+  geom_point(aes(y=Switzerland, color='blue')) + 
+  labs(x = "Year") + 
+  labs(y = "Life Expectancy") +
+  scale_colour_manual(name = 'country',
+                      values =c('red'='red','blue'='blue'), 
+                      labels = c('Canada','Switzerland'))
 ```
 
-    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
-    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+![](assignment04-figalit_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
-![](assignment04-figalit_files/figure-markdown_github/unnamed-chunk-4-1.png) In this case, it's very easily and clearly visible that Switzerland has a higher life expectancy than Canada over the years.
+In this case, it's very easily and clearly visible that Switzerland has a higher life expectancy than Canada over the years.
 
 ### Join Prompt (join, merge, look up)
 
@@ -244,7 +243,3 @@ knitr::kable(head(full_join(gapminder, oceaniaExtraInfo, by = "continent")))
 | Afghanistan | Asia      |  1977|   38.438|  14880372|   786.1134|           NA| NA         |
 
 Thanks for reading my homework! Enjoy your day :smile:
-
-### Resources
-
-Links I found useful: - <https://jules32.github.io/2016-07-12-Oxford/dplyr_tidyr/#3_tidyr_overview> - <https://stackoverflow.com/questions/21192002/how-to-combine-2-plots-ggplot-into-one-plot>
