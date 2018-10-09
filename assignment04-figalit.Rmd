@@ -66,11 +66,31 @@ In this prompt I have chosen Activity #1:
 [x] One row per country, a country variable and one or more variables with extra info, such as language spoken, NATO membership, national animal, or capitol city.
 [x] One row per continent, a continent variable and one or more variables with extra info, such as northern versus southern hemisphere.
 
+Lets get a VERY QUICK feel of the gapminder dataset. 
+```{r}
+knitr::kable(head(gapminder))
+```
+And now let's check what continents there are in gapminder, so our joins aren't far off.. 
+```{r}
+knitr::kable(unique(gapminder$continent))
+```
+
+I'll go ahead and build a super simple (and kind of proof of concept only) dataframe that has a row per continent, a variable about number of countries for that continent and another variable for whether it is in northern or southern hemisphere. 
+```{r}
+continentExtraInfo <- tribble( ~name, ~noCountries, ~hemisphere, 
+                               "Asia", 48, "North",
+                               "Europe", 44, "North",
+                               "Africa", 54, "South",
+                               "Americas", 55, "North",
+                               "Oceania", 14, "South")
+?tribble
+```
+I could have alternatively built a csv file and read it into a dataframe, but due to the small data I avoided that approach, and use a nice tribble that makes more sense for such small data. 
+
+
 
 
 ### Resources
-
-
-
 Links I found useful:
-https://jules32.github.io/2016-07-12-Oxford/dplyr_tidyr/#3_tidyr_overview
+- https://jules32.github.io/2016-07-12-Oxford/dplyr_tidyr/#3_tidyr_overview
+- https://stackoverflow.com/questions/21192002/how-to-combine-2-plots-ggplot-into-one-plot
