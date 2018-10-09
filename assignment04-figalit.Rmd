@@ -32,15 +32,32 @@ filteredCanSwiss <- gapminder %>%
 lifeExpPerYear_CanadaVsSwiss <- spread(filteredCanSwiss, country, lifeExp)
 ```
 
-
-[x]Take advantage of this new data shape to scatterplot life expectancy for one country against that of another.
+We have now brought the data to the required state, where there is one line per year, and Canada's and Switzerland's life expectancy as columns:
 ```{r}
-ggplot(lifeExpPerYear_CanadaVsSwiss, aes(x=year, y=Canada)) +
-  geom_point()
-
+knitr::kable(lifeExpPerYear_CanadaVsSwiss)
 ```
 
+[x] Take advantage of this new data shape to scatterplot life expectancy for one country against that of another.
+To plot the data for each country separately, we would do something on these terms, for example, for Canada:
+```{r}
+ggplot(lifeExpPerYear_CanadaVsSwiss, aes(x=year, y=Canada)) +
+  labs(title = "Life expectancy of Canada over time.") +
+  labs(x = "Year") + 
+  labs(y = "Canada's life expectancy") +
+  geom_point()
+```
 
+The advantage of this approach lies in the fact that now we have the data in a readily and easily servable state for comparison with one another, and we can "combine" the two plots together to better see the underlying trends. 
+```{r}
+ggplot() +
+  geom_point(data=lifeExpPerYear_CanadaVsSwiss, aes(year, Canada)) + 
+  geom_smooth(data=lifeExpPerYear_CanadaVsSwiss, aes(year, Canada), 
+              colour="darkblue", size=0.5) + 
+  geom_point(data=lifeExpPerYear_CanadaVsSwiss, aes(year, Switzerland)) + 
+  geom_smooth(data=lifeExpPerYear_CanadaVsSwiss, aes(year, Switzerland), 
+              colour="pink", size=0.5)
+```
+In this case, it's very easily and clearly visible that Switzerland has a higher life expectancy than Canada over the years.
 
 ### Join Prompt (join, merge, look up)
 In this prompt I have chosen Activity #1:
